@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "TZ=Europe/Paris vitest run",
     "preview": "vite preview",
     "types:api": "openapi-typescript http://backend:8000/api/docs.jsonopenapi -o src/api/schema.d.ts"
   },
