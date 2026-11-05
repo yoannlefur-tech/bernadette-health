@@ -18,6 +18,7 @@ function anonymousApi() {
       return new HttpResponse(null, { status: 401 })
     }),
     http.get('*/api/me', () => HttpResponse.json(me)),
+    http.get('*/api/dogs', () => HttpResponse.json({ member: [] })),
   )
 
   return calls
@@ -116,10 +117,11 @@ describe('LoginPage', () => {
     server.use(
       http.post('*/api/auth/refresh', () => HttpResponse.json({ token: 'access-token' })),
       http.get('*/api/me', () => HttpResponse.json(me)),
+      http.get('*/api/dogs', () => HttpResponse.json({ member: [] })),
     )
     renderApp('/login')
 
-    await screen.findByRole('heading', { name: 'Bernadette Health' })
+    await screen.findByRole('heading', { name: 'Mes chiens' })
     expect(screen.queryByRole('button', { name: 'Se connecter' })).not.toBeInTheDocument()
   })
 })

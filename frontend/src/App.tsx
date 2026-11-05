@@ -1,7 +1,7 @@
-import Typography from '@mui/material/Typography'
 import { Route, Routes } from 'react-router'
 import { LoginPage } from './auth/LoginPage'
 import { ProtectedRoute } from './auth/ProtectedRoute'
+import { HomePage } from './HomePage'
 import { NotFoundPage } from './NotFoundPage'
 
 function App() {
@@ -9,7 +9,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
-        <Route index element={<Typography variant="h1">Bernadette Health</Typography>} />
+        <Route index element={<HomePage />} />
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
