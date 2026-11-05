@@ -24,3 +24,19 @@ export function mockLoggedInApi() {
     http.get(`*${DOG_IRI}`, () => HttpResponse.json(bernadette)),
   )
 }
+
+export function apiWeighIn(id: string, measured_at: string, weight_grams: number) {
+  return {
+    '@id': `/api/weight_entries/${id}`,
+    '@type': 'WeightEntry',
+    id,
+    dog: DOG_IRI,
+    measured_at,
+    weight_grams,
+  }
+}
+
+/** A JSON-LD collection page of the weigh-ins. */
+export function weighInsPage(member: ReturnType<typeof apiWeighIn>[], next?: string) {
+  return { member, totalItems: member.length, ...(next ? { view: { next } } : {}) }
+}
