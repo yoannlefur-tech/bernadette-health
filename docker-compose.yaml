@@ -32,7 +32,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "8002:8000"
+      - "127.0.0.1:8002:8000"
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
@@ -50,7 +50,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "5174:5173"
+      - "127.0.0.1:5174:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
