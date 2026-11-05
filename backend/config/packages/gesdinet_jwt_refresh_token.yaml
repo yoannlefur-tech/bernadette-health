@@ -1,0 +1,22 @@
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\RefreshToken
+    ttl: 2592000
+    # Each refresh replaces the token, and restarts its 30 days.
+    single_use: true
+    hash_tokens:
+        enabled: true
+        accept_stored_in_the_clear: false
+    api_platform:
+        enabled: true
+    cookie:
+        enabled: true
+        same_site: lax
+        path: /api/auth
+        http_only: true
+        secure: true
+        remove_token_from_body: true
+
+when@dev:
+    gesdinet_jwt_refresh_token:
+        cookie:
+            secure: false

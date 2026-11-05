@@ -29,6 +29,19 @@ security:
             login_throttling:
                 max_attempts: 5
                 interval: '1 minute'
+        # Without the jwt authenticator on purpose: it kicks in as soon as an
+        # Authorization header is present, so an expired access token would get
+        # a 401 on the very endpoints used to recover from it.
+        auth_session:
+            pattern: ^/api/auth/(refresh|logout)$
+            stateless: true
+            provider: app_users
+            refresh_jwt:
+                check_path: /api/auth/refresh
+            # A route name, not a path: a path would generate a route accepting
+            # any method, and a SameSite=Lax cookie is sent on a GET navigation.
+            logout:
+                path: api_auth_logout
         api:
             pattern: ^/api
             stateless: true
