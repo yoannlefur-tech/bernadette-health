@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:16
     ports:
-      - "${DB_PORT:-5434}:5432"
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
     environment:
       POSTGRES_DB: bernadette
       POSTGRES_USER: app
@@ -21,7 +21,7 @@ services:
   adminer:
     image: adminer
     ports:
-      - "8082:8080"
+      - "127.0.0.1:8082:8080"
     depends_on:
       - db
     networks:
