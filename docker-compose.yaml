@@ -1,0 +1,71 @@
+# docker-compose.yml (Postgres seul au début)
+services:
+  db:
+    image: postgres:16
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: bernadette
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: bernadette
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d bernadette"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  adminer:
+    image: adminer
+    ports:
+      - "8082:8080"
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8002:8000"
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      APP_SECRET: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+      DATABASE_URL: "postgresql://app:bernadette@db:5432/bernadette?serverVersion=16&charset=utf8"
+      JWT_SECRET_KEY: "%kernel.project_dir%/config/jwt/private.pem"
+      JWT_PUBLIC_KEY: "%kernel.project_dir%/config/jwt/public.pem"
+      JWT_PASSPHRASE: "8e12ffd0a7f7c74514ba680dcfd71d940f9c181c47b1b7f3fde24fed721da81b"
+      CORS_ALLOW_ORIGIN: "^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$$"
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5174:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
