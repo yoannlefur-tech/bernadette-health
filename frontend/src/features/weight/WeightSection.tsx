@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { DeleteWeighInDialog } from './DeleteWeighInDialog'
 import type { Dog, WeighIn } from './types'
 import { useWeighIns } from './weighInsApi'
+import { WeightAlerts } from './WeightAlerts'
 import { WeightChart } from './WeightChart'
 import { WeightFormDialog } from './WeightFormDialog'
 import { WeightHistory } from './WeightHistory'
@@ -43,6 +44,7 @@ export function WeightSection({ dogId, dog }: WeightSectionProps) {
           </Button>
         )}
       </Stack>
+      <WeightAlerts weighIns={weighIns} birthDate={dog.birth_date} />
       <WeightChart dogName={dog.name} weighIns={weighIns} />
       <WeightHistory
         weighIns={weighIns}
