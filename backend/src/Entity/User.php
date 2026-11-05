@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\NotExposed;
 use App\Repository\UserRepository;
+use App\State\CurrentUserProvider;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -17,6 +23,22 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'app_user')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'])]
+#[ApiResource(
+    // The IRI of a user comes from the first item operation, so NotExposed must
+    // stay first: otherwise every created_by would be "/api/me". It answers 404,
+    // users cannot be read through the API, only themselves through /me.
+    operations: [
+        new NotExposed(uriTemplate: '/users/{id}'),
+        new Get(
+            uriTemplate: '/me',
+            uriVariables: [],
+            security: "is_granted('IS_AUTHENTICATED_FULLY')",
+            provider: CurrentUserProvider::class,
+        ),
+    ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use TimestampableTrait;
@@ -26,12 +48,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME)]
+    #[ApiProperty(identifier: true)]
+    #[Groups(['user:read'])]
     private Uuid $id;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
     #[Assert\Length(max: 180)]
+    #[Groups(['user:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -39,6 +64,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /** @var list<string> */
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private array $roles = [];
 
     public function __construct()
