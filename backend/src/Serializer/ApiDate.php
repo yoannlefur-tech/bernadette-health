@@ -16,6 +16,10 @@ final class ApiDate
     /** "!" resets the time to midnight, otherwise createFromFormat() keeps the current time. */
     public const DENORMALIZATION = [DateTimeNormalizer::FORMAT_KEY => '!Y-m-d'];
 
+    /** OpenAPI schemas: without them, dates are documented as date-time. */
+    public const SCHEMA = ['type' => 'string', 'format' => 'date'];
+    public const NULLABLE_SCHEMA = ['type' => ['string', 'null'], 'format' => 'date'];
+
     /**
      * Latest accepted date for an event that already happened. The server runs
      * in UTC, so "today" would reject the local date just after midnight in

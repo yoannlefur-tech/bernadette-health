@@ -67,6 +67,7 @@ class WeightEntry
         'value === null or this.getDog() === null or value >= this.getDog().getBirthDate()',
         message: 'This date cannot be before the birth date of the dog.',
     )]
+    #[ApiProperty(schema: ApiDate::SCHEMA)]
     #[Context(normalizationContext: ApiDate::NORMALIZATION, denormalizationContext: ApiDate::DENORMALIZATION)]
     #[Groups(['weight_entry:read', 'weight_entry:write'])]
     private ?\DateTimeImmutable $measured_at = null;

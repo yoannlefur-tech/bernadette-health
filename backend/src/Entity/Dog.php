@@ -56,6 +56,7 @@ class Dog
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     #[Assert\NotNull]
     #[Assert\LessThanOrEqual(ApiDate::LATEST_PAST)]
+    #[ApiProperty(schema: ApiDate::SCHEMA)]
     #[Context(normalizationContext: ApiDate::NORMALIZATION, denormalizationContext: ApiDate::DENORMALIZATION)]
     #[Groups(['dog:read', 'dog:write'])]
     private ?\DateTimeImmutable $birth_date = null;

@@ -75,6 +75,7 @@ class Vaccination
         'value === null or this.getDog() === null or value >= this.getDog().getBirthDate()',
         message: 'This date cannot be before the birth date of the dog.',
     )]
+    #[ApiProperty(schema: ApiDate::SCHEMA)]
     #[Context(normalizationContext: ApiDate::NORMALIZATION, denormalizationContext: ApiDate::DENORMALIZATION)]
     #[Groups(['vaccination:read', 'vaccination:write'])]
     private ?\DateTimeImmutable $administered_at = null;
@@ -84,6 +85,7 @@ class Vaccination
         'value === null or this.getAdministeredAt() === null or value > this.getAdministeredAt()',
         message: 'The next due date must be after the administration date.',
     )]
+    #[ApiProperty(schema: ApiDate::NULLABLE_SCHEMA)]
     #[Context(normalizationContext: ApiDate::NORMALIZATION, denormalizationContext: ApiDate::DENORMALIZATION)]
     #[Groups(['vaccination:read', 'vaccination:write'])]
     private ?\DateTimeImmutable $next_due_at = null;

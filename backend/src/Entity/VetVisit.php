@@ -67,6 +67,7 @@ class VetVisit
         'value === null or this.getDog() === null or value >= this.getDog().getBirthDate()',
         message: 'This date cannot be before the birth date of the dog.',
     )]
+    #[ApiProperty(schema: ApiDate::SCHEMA)]
     #[Context(normalizationContext: ApiDate::NORMALIZATION, denormalizationContext: ApiDate::DENORMALIZATION)]
     #[Groups(['vet_visit:read', 'vet_visit:write'])]
     private ?\DateTimeImmutable $visited_at = null;
