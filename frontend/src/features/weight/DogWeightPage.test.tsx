@@ -32,6 +32,24 @@ describe('DogWeightPage', () => {
     expect(screen.queryByText('Chien introuvable')).not.toBeInTheDocument()
   })
 
+  it('does not ask for the weigh-ins of a dog which does not exist', async () => {
+    let weighInsCalls = 0
+    mockLoggedInApi()
+    server.use(
+      http.get(`*${DOG_IRI}`, () => new HttpResponse(null, { status: 404 })),
+      http.get('*/api/weight_entries', () => {
+        weighInsCalls += 1
+
+        return HttpResponse.json({ member: [] })
+      }),
+    )
+    renderApp(DOG_IRI.replace('/api', ''))
+
+    await screen.findByRole('heading', { name: 'Chien introuvable' })
+
+    expect(weighInsCalls).toBe(0)
+  })
+
   it('requires a session', async () => {
     server.use(http.post('*/api/auth/refresh', () => new HttpResponse(null, { status: 401 })))
     renderApp(DOG_IRI.replace('/api', ''))

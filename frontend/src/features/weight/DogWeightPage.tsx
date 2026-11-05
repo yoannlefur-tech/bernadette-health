@@ -8,6 +8,7 @@ import { Link, useParams } from 'react-router'
 import { AppHeader } from '../../AppHeader'
 import { formatDate } from './dates'
 import { useDog } from './useDog'
+import { WeightSection } from './WeightSection'
 
 function DogNotFound() {
   return (
@@ -48,6 +49,7 @@ function DogContent({ dogId }: { dogId: string }) {
           {dog.birth_date && ` · Date de naissance : ${formatDate(dog.birth_date)}`}
         </Typography>
       </div>
+      <WeightSection dogId={dogId} dog={dog} />
     </Stack>
   )
 }

@@ -14,14 +14,15 @@ export const bernadette = {
   coat: 'Poil long',
 }
 
-/** A logged in session and the dog above. */
-export function mockLoggedInApi() {
+/** A logged in session and the dog above, with its weigh-ins in a single page. */
+export function mockLoggedInApi(weighIns: ReturnType<typeof apiWeighIn>[] = []) {
   server.use(
     http.post('*/api/auth/refresh', () => HttpResponse.json({ token: 'test-token' })),
     http.get('*/api/me', () =>
       HttpResponse.json({ '@id': '/api/me', '@type': 'User', email: 'dev@example.com' }),
     ),
     http.get(`*${DOG_IRI}`, () => HttpResponse.json(bernadette)),
+    http.get('*/api/weight_entries', () => HttpResponse.json(weighInsPage(weighIns))),
   )
 }
 
