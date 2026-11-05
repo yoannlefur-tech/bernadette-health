@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['weight_entry:read', 'timestampable:read']],
+    normalizationContext: ['groups' => ['weight_entry:read', 'timestampable:read', 'blameable:read']],
     denormalizationContext: ['groups' => ['weight_entry:write']],
     order: ['measured_at' => 'DESC', 'id' => 'DESC'],
     parameters: [
@@ -43,8 +43,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[measured_at]' => new QueryParameter(filter: new SortFilter(), property: 'measured_at'),
     ],
 )]
-class WeightEntry implements DogRecordInterface
+class WeightEntry implements DogRecordInterface, BlameableInterface
 {
+    use BlameableTrait;
     use TimestampableTrait;
 
     #[ORM\Id]

@@ -7,10 +7,12 @@ namespace App\Tests\Api;
 use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
 use ApiPlatform\Test\Response;
+use App\Entity\Dog;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Uid\Uuid;
 
 abstract class ApiResourceTestCase extends ApiTestCase
 {
@@ -43,6 +45,16 @@ abstract class ApiResourceTestCase extends ApiTestCase
         $entity_manager->flush();
 
         return $user;
+    }
+
+    /** There is no endpoint to add an owner for now. */
+    protected function addOwnerInDatabase(string $dog_iri, User $owner): void
+    {
+        $entity_manager = static::getContainer()->get(EntityManagerInterface::class);
+        $dog = $entity_manager->find(Dog::class, Uuid::fromString(basename($dog_iri)));
+        $dog->addOwner($entity_manager->find(User::class, $owner->getId()));
+        $entity_manager->flush();
+        $entity_manager->clear();
     }
 
     /** Sends the next requests with a real token signed for this user. */

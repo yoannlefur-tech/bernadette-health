@@ -38,7 +38,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['dog:read', 'timestampable:read']],
+    normalizationContext: ['groups' => ['dog:read', 'timestampable:read', 'blameable:read']],
     denormalizationContext: ['groups' => ['dog:write']],
     order: ['birth_date' => 'DESC', 'id' => 'DESC'],
     parameters: [
@@ -46,8 +46,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[birth_date]' => new QueryParameter(filter: new SortFilter(), property: 'birth_date'),
     ],
 )]
-class Dog
+class Dog implements BlameableInterface
 {
+    use BlameableTrait;
     use TimestampableTrait;
 
     #[ORM\Id]

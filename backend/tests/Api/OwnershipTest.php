@@ -8,7 +8,6 @@ use App\Entity\Dog;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\Uid\Uuid;
 
 final class OwnershipTest extends ApiResourceTestCase
 {
@@ -47,15 +46,6 @@ final class OwnershipTest extends ApiResourceTestCase
         self::assertResponseStatusCodeSame(201);
 
         return $response->toArray()['@id'];
-    }
-
-    private function addOwnerInDatabase(string $dog_iri, User $owner): void
-    {
-        $entity_manager = static::getContainer()->get(EntityManagerInterface::class);
-        $dog = $entity_manager->find(Dog::class, Uuid::fromString(basename($dog_iri)));
-        $dog->addOwner($entity_manager->find(User::class, $owner->getId()));
-        $entity_manager->flush();
-        $entity_manager->clear();
     }
 
     private function dogOwnerRows(string $dog_iri): int
