@@ -38,6 +38,8 @@ final class MeTest extends ApiResourceTestCase
 
     public function testAnonymousRequestIsRefused(): void
     {
+        $this->actingAsAnonymous();
+
         $this->get('/api/me');
 
         self::assertResponseStatusCodeSame(401);

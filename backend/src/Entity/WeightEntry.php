@@ -43,7 +43,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[measured_at]' => new QueryParameter(filter: new SortFilter(), property: 'measured_at'),
     ],
 )]
-class WeightEntry
+class WeightEntry implements DogRecordInterface
 {
     use TimestampableTrait;
 

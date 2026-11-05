@@ -20,11 +20,16 @@ abstract class ApiResourceTestCase extends ApiTestCase
 
     protected Client $client;
 
+    /** The user the requests are sent as, unless the test changes it. */
+    protected User $user;
+
     private ?string $token = null;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        $this->user = $this->createUser('current-user@example.com');
+        $this->actingAs($this->user);
     }
 
     protected function createUser(string $email = 'owner@example.com'): User
@@ -44,6 +49,12 @@ abstract class ApiResourceTestCase extends ApiTestCase
     protected function actingAs(User $user): void
     {
         $this->token = static::getContainer()->get(JWTTokenManagerInterface::class)->create($user);
+    }
+
+    /** Sends the next requests without any token. */
+    protected function actingAsAnonymous(): void
+    {
+        $this->token = null;
     }
 
     /**

@@ -43,7 +43,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[visited_at]' => new QueryParameter(filter: new SortFilter(), property: 'visited_at'),
     ],
 )]
-class VetVisit
+class VetVisit implements DogRecordInterface
 {
     use TimestampableTrait;
 

@@ -45,7 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[next_due_at]' => new QueryParameter(filter: new SortFilter(), property: 'next_due_at'),
     ],
 )]
-class Vaccination
+class Vaccination implements DogRecordInterface
 {
     use TimestampableTrait;
 
