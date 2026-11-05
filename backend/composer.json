@@ -83,9 +83,14 @@
         }
     },
     "require-dev": {
+        "api-platform/test": "^5.0",
+        "dama/doctrine-test-bundle": "^8.7",
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
+        "friendsofphp/php-cs-fixer": "^3.95",
         "phpunit/phpunit": "^12.5",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",
+        "symfony/http-client": "7.4.*",
         "symfony/maker-bundle": "^1.68"
     }
 }
