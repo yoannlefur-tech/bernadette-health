@@ -33,8 +33,28 @@
 - Tests : `docker compose exec backend bin/phpunit` (env `test`, base dédiée)
 - Style PHP : `docker compose exec backend vendor/bin/php-cs-fixer fix --dry-run --diff`
 - Front : `docker compose exec frontend npm run lint`
+- Tests front : `docker compose exec frontend npm run test` (Vitest, Testing Library, MSW)
+- Types front : `docker compose exec frontend npx tsc -b`
 - Types API : `docker compose exec frontend npm run types:api`
 - URLs : API `http://localhost:8002`· front `http://localhost:5174` · Adminer `http://localhost:8082` (serveur `db`)
+
+## Authentification frontend
+
+- Proxy : en dev, Vite proxifie `/api` vers `API_PROXY_TARGET` (défaut `http://backend:8000`). Le front appelle la même origine que la page : ni CORS ni `credentials`, et le cookie de refresh passe tel quel. Redémarrer le conteneur front après un changement de `vite.config.ts`
+- Clients : `client` (`src/api/client.ts`) pour l'API, avec Bearer et refresh automatique ; `authClient` (`src/api/authClient.ts`), sans middleware, réservé à `/api/auth/*`
+- Token : l'access token reste en mémoire dans `src/api/tokenStore.ts`, jamais dans localStorage, sessionStorage ni IndexedDB, jamais dans les logs. Recharger la page le perd : le refresh silencieux au démarrage le renouvelle
+- Refresh unique : toujours passer par `refreshSession()` (`src/api/refresh.ts`), jamais d'appel direct. Le refresh token tourne à chaque usage et deux refresh simultanés donnent un 401 : une promesse partagée déduplique dans l'onglet, le verrou `navigator.locks` `auth-refresh` sérialise entre onglets. Login et logout prennent le même verrou
+- Après un 401 hors `/api/auth/*` : un refresh et un seul rejeu. Seul un 401 du refresh vide la session. Erreur réseau ou 5xx : la requête échoue, la session reste. Au démarrage, toute erreur donne `anonymous`
+- `navigator.locks` exige un contexte sécurisé (localhost ou HTTPS) : sans lui, la sérialisation entre onglets ne s'applique pas
+- Session : `useAuth()` expose `user`, `status`, `login` et `logout`. Le logout et l'expiration vident le cache TanStack Query, et le logout est propagé aux autres onglets par `BroadcastChannel`
+- Ajouter une route protégée : la déclarer sous le layout `ProtectedRoute` dans `src/App.tsx`, puis appeler l'API avec `client`. Destination conservée dans `state.from`, à relire uniquement via `safeRedirectTarget()` (pas d'open redirect)
+
+  ```tsx
+  <Route element={<ProtectedRoute />}>
+    <Route index element={<HomePage />} />
+    <Route path="/dogs/:id" element={<DogPage />} />
+  </Route>
+  ```
 
 ## Installation d'un nouveau poste
 
