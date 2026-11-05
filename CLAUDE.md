@@ -56,6 +56,33 @@
   </Route>
   ```
 
+## Suivi du poids
+
+- Page : `/dogs/:dogId`, route protégée. Un 404 de l'API (chien inconnu, d'un autre utilisateur ou identifiant mal formé) affiche « Chien introuvable »
+- Dossier `frontend/src/features/weight/` :
+  - Fonctions pures : `weightUnits.ts` (kg ↔ grammes), `dates.ts`, `weighIns.ts` (tri, écarts), `alerts.ts`, `chartData.ts`
+  - Seuils d'alerte et d'avertissement : uniquement dans `constants.ts`
+  - Données : `useDog.ts` et `weighInsApi.ts` (liste complète et mutations)
+  - Composants : `DogWeightPage`, `WeightSection`, `WeightAlerts`, `WeightChart`, `WeightHistory`, `WeightFormDialog`, `DeleteWeighInDialog`
+- Poids : en grammes entiers partout, convertis en kg seulement à l'affichage et à la saisie. La saisie est parsée chiffre par chiffre (`4.35 * 1000` serait un flottant)
+- Pièges de dates :
+  - Jamais `toISOString()` pour la date du jour (jour UTC) : `todayApiDate()`
+  - Jamais `new Date('Y-m-d')` (lu en UTC) : `parseApiDate()`
+  - Les chaînes `Y-m-d` se comparent directement. Les écarts en jours passent par `daysBetween()`, insensible au changement d'heure
+  - `npm run test` fixe `TZ=Europe/Paris` : dans un conteneur en UTC, un `toISOString()` passerait inaperçu
+  - Le serveur est en UTC : `ApiDate::LATEST_PAST` vaut `tomorrow` pour accepter la date locale juste après minuit. L'API accepte donc demain à toute heure, et c'est le formulaire qui refuse une date future
+- Alertes, sur la dernière pesée uniquement : une pesée du même jour n'est jamais une référence (le poids varie avec les repas)
+  - Perte : par rapport à la plus récente pesée d'une date strictement antérieure, à tout âge
+  - Gain : par rapport à la plus ancienne pesée de J-30 inclus à J exclu, si le chien a 12 mois ou plus à la date de la pesée
+  - Le tableau, lui, affiche l'écart avec la ligne précédente, même le même jour
+- API :
+  - Préciser `Content-Type` : `application/ld+json` en POST, `application/merge-patch+json` en PATCH (le défaut de `openapi-fetch` donne un 415)
+  - Pagination : ne lire que le numéro de page dans `view.next`, pour ne jamais envoyer le token vers une URL reçue
+  - Tri : pas de filtre `order[id]`, on garde l'ordre par défaut (stable d'une page à l'autre) et on trie côté client
+  - Erreurs 422 : les messages de l'API sont en anglais, le formulaire affiche toujours un texte français par champ
+- Limite connue : avec deux pesées le même jour, les deux points sont dessinés mais l'infobulle de la courbe n'en affiche qu'une, sur le même axe X. Le tableau montre les deux valeurs
+- Tests : le rendu SVG n'est pas testé (`LineChart` est simulé dans `src/test/setup.ts`), seule `buildChartData()` l'est
+
 ## Installation d'un nouveau poste
 
 1. Copier les fichiers d'exemple : `cp .env.example .env` et `cp backend/.env.local.example backend/.env.local`
