@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { DeleteWeighInDialog } from './DeleteWeighInDialog'
 import type { Dog, WeighIn } from './types'
 import { useWeighIns } from './weighInsApi'
+import { WeightChart } from './WeightChart'
 import { WeightFormDialog } from './WeightFormDialog'
 import { WeightHistory } from './WeightHistory'
 
@@ -34,7 +35,7 @@ export function WeightSection({ dogId, dog }: WeightSectionProps) {
     <Stack spacing={2}>
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h6" component="h2">
-          Historique
+          Suivi du poids
         </Typography>
         {weighIns.length > 0 && (
           <Button variant="contained" size="small" onClick={openCreateForm}>
@@ -42,6 +43,7 @@ export function WeightSection({ dogId, dog }: WeightSectionProps) {
           </Button>
         )}
       </Stack>
+      <WeightChart dogName={dog.name} weighIns={weighIns} />
       <WeightHistory
         weighIns={weighIns}
         onAdd={openCreateForm}
