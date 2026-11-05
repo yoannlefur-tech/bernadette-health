@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { DeleteWeighInDialog } from './DeleteWeighInDialog'
 import type { Dog, WeighIn } from './types'
 import { useWeighIns } from './weighInsApi'
+import { WeightFormDialog } from './WeightFormDialog'
 import { WeightHistory } from './WeightHistory'
 
 type WeightSectionProps = {
@@ -17,6 +18,7 @@ type WeightSectionProps = {
 export function WeightSection({ dogId, dog }: WeightSectionProps) {
   const { data: weighIns, isPending, isError } = useWeighIns(dogId, dog['@id'])
   const [deleted, setDeleted] = useState<WeighIn | null>(null)
+  const [form, setForm] = useState<{ editing: WeighIn | null } | null>(null)
 
   if (isPending) {
     return <CircularProgress aria-label="Chargement des pesées" />
@@ -26,7 +28,7 @@ export function WeightSection({ dogId, dog }: WeightSectionProps) {
     return <Alert severity="error">Impossible de charger les pesées</Alert>
   }
 
-  const openForm = () => undefined
+  const openCreateForm = () => setForm({ editing: null })
 
   return (
     <Stack spacing={2}>
@@ -35,12 +37,27 @@ export function WeightSection({ dogId, dog }: WeightSectionProps) {
           Historique
         </Typography>
         {weighIns.length > 0 && (
-          <Button variant="contained" size="small" onClick={openForm}>
+          <Button variant="contained" size="small" onClick={openCreateForm}>
             Ajouter une pesée
           </Button>
         )}
       </Stack>
-      <WeightHistory weighIns={weighIns} onAdd={openForm} onEdit={openForm} onDelete={setDeleted} />
+      <WeightHistory
+        weighIns={weighIns}
+        onAdd={openCreateForm}
+        onEdit={(editing) => setForm({ editing })}
+        onDelete={setDeleted}
+      />
+      {form && (
+        <WeightFormDialog
+          dogId={dogId}
+          dogIri={dog['@id']}
+          birthDate={dog.birth_date}
+          weighIns={weighIns}
+          editing={form.editing}
+          onClose={() => setForm(null)}
+        />
+      )}
       {deleted && (
         <DeleteWeighInDialog dogId={dogId} weighIn={deleted} onClose={() => setDeleted(null)} />
       )}
