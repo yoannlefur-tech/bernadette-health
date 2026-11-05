@@ -12,12 +12,16 @@ use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\AutowireDecorated;
 
 /**
- * Documents the logout, which neither Lexik nor the refresh token bundle cover.
- * The priority makes it run after their own decorators (0 and -25).
+ * Documents the logout, which neither Lexik nor the refresh token bundle cover,
+ * and marks the authentication routes as public: they would otherwise inherit
+ * the global Bearer requirement. The priority makes it run after the decorators
+ * of these bundles (0 and -25).
  */
 #[AsDecorator(decorates: 'api_platform.openapi.factory', priority: -50)]
 final readonly class AuthOpenApiFactory implements OpenApiFactoryInterface
 {
+    private const PUBLIC_PATHS = ['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'];
+
     public function __construct(
         #[AutowireDecorated]
         private OpenApiFactoryInterface $decorated,
@@ -39,6 +43,11 @@ final readonly class AuthOpenApiFactory implements OpenApiFactoryInterface
                     400 => ['description' => 'No refresh token in the request'],
                 ])
         ));
+
+        foreach (self::PUBLIC_PATHS as $path) {
+            $path_item = $open_api->getPaths()->getPath($path);
+            $open_api->getPaths()->addPath($path, $path_item->withPost($path_item->getPost()->withSecurity([])));
+        }
 
         return $open_api;
     }
