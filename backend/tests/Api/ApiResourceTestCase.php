@@ -7,23 +7,60 @@ namespace App\Tests\Api;
 use ApiPlatform\Test\ApiTestCase;
 use ApiPlatform\Test\Client;
 use ApiPlatform\Test\Response;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 abstract class ApiResourceTestCase extends ApiTestCase
 {
     protected static ?bool $alwaysBootKernel = false;
 
+    protected const PASSWORD = 'correct horse battery staple';
+
     protected Client $client;
+
+    private ?string $token = null;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
     }
 
+    protected function createUser(string $email = 'owner@example.com'): User
+    {
+        $container = static::getContainer();
+        $user = (new User())->setEmail($email);
+        $user->setPassword($container->get(UserPasswordHasherInterface::class)->hashPassword($user, self::PASSWORD));
+
+        $entity_manager = $container->get(EntityManagerInterface::class);
+        $entity_manager->persist($user);
+        $entity_manager->flush();
+
+        return $user;
+    }
+
+    /** Sends the next requests with a real token signed for this user. */
+    protected function actingAs(User $user): void
+    {
+        $this->token = static::getContainer()->get(JWTTokenManagerInterface::class)->create($user);
+    }
+
+    /**
+     * @param array<string, string> $headers
+     *
+     * @return array<string, string>
+     */
+    private function withToken(array $headers): array
+    {
+        return null === $this->token ? $headers : $headers + ['Authorization' => 'Bearer '.$this->token];
+    }
+
     /** @param array<string, mixed> $body */
     protected function post(string $uri, array $body): Response
     {
         return $this->client->request('POST', $uri, [
-            'headers' => ['Content-Type' => 'application/ld+json', 'Accept' => 'application/ld+json'],
+            'headers' => $this->withToken(['Content-Type' => 'application/ld+json', 'Accept' => 'application/ld+json']),
             'json' => $body,
         ]);
     }
@@ -32,19 +69,19 @@ abstract class ApiResourceTestCase extends ApiTestCase
     protected function patch(string $uri, array $body): Response
     {
         return $this->client->request('PATCH', $uri, [
-            'headers' => ['Content-Type' => 'application/merge-patch+json', 'Accept' => 'application/ld+json'],
+            'headers' => $this->withToken(['Content-Type' => 'application/merge-patch+json', 'Accept' => 'application/ld+json']),
             'json' => $body,
         ]);
     }
 
     protected function get(string $uri): Response
     {
-        return $this->client->request('GET', $uri, ['headers' => ['Accept' => 'application/ld+json']]);
+        return $this->client->request('GET', $uri, ['headers' => $this->withToken(['Accept' => 'application/ld+json'])]);
     }
 
     protected function delete(string $uri): Response
     {
-        return $this->client->request('DELETE', $uri, ['headers' => ['Accept' => 'application/ld+json']]);
+        return $this->client->request('DELETE', $uri, ['headers' => $this->withToken(['Accept' => 'application/ld+json'])]);
     }
 
     /**

@@ -1,0 +1,6 @@
+# Handled by the security firewalls, so these routes have no controller.
+# Restricting the method here matters: the router runs before the firewall, so
+# any other method gets a 405 instead of reaching the authenticator.
+api_auth_login:
+    path: /api/auth/login
+    methods: [POST]
