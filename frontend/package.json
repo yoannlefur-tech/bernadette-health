@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "types:api": "openapi-typescript http://localhost:8000/api/docs.json -o src/api/schema.d.ts"
+    "types:api": "openapi-typescript http://backend:8000/api/docs.jsonopenapi -o src/api/schema.d.ts"
   },
   "dependencies": {
     "react": "^19.3.1",
@@ -24,8 +24,14 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "openapi-typescript": "^7.13.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.6"
+  },
+  "overrides": {
+    "openapi-typescript": {
+      "typescript": "$typescript"
+    }
   }
 }
