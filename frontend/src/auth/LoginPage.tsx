@@ -7,9 +7,10 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Navigate } from 'react-router'
+import { Navigate, useLocation } from 'react-router'
 import { LoginError, useAuth } from './authContext'
 import { LoadingScreen } from './LoadingScreen'
+import { safeRedirectTarget } from './redirect'
 
 type LoginFormValues = {
   email: string
@@ -31,6 +32,7 @@ function loginErrorMessage(error: unknown): string {
 
 export function LoginPage() {
   const { status, login } = useAuth()
+  const location = useLocation()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const {
     register,
@@ -43,7 +45,7 @@ export function LoginPage() {
   }
 
   if (status === 'authenticated') {
-    return <Navigate to="/" replace />
+    return <Navigate to={safeRedirectTarget(location.state?.from)} replace />
   }
 
   const onSubmit = async ({ email, password }: LoginFormValues) => {
