@@ -56,6 +56,86 @@ export interface paths {
         patch: operations["api_dogs_id_patch"];
         trace?: never;
     };
+    "/api/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Creates a user token.
+         * @description Creates a user token.
+         */
+        post: operations["login_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Invalidates the refresh token and removes its cookie.
+         * @description The refresh token is read from the "refresh_token" cookie, so the request needs no body.
+         */
+        post: operations["auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchanges a refresh token for a new JWT.
+         * @description The refresh token is read from the "refresh_token" cookie, so the request needs no body. The new one is returned the same way.
+         */
+        post: operations["gesdinet_jwt_refresh_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Retrieves a User resource.
+         * @description Retrieves a User resource.
+         */
+        get: operations["api_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/vaccinations": {
         parameters: {
             query?: never;
@@ -279,7 +359,7 @@ export interface components {
             coat?: string;
             microchip_number?: string | null;
         };
-        "Dog.jsonld-dog.read_timestampable.read": components["schemas"]["HydraItemBaseSchema"] & {
+        "Dog.jsonld-dog.read_timestampable.read_blameable.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
             readonly id?: string;
             name: string;
@@ -288,6 +368,16 @@ export interface components {
             breed: string;
             coat: string;
             microchip_number?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            created_by?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            updated_by?: string | null;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */
@@ -376,6 +466,13 @@ export interface components {
             "@id": string;
             "@type": string;
         };
+        "User.jsonld-user.read": components["schemas"]["HydraItemBaseSchema"] & {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: email */
+            email: string;
+            roles?: string[];
+        };
         "Vaccination-vaccination.write.jsonMergePatch": {
             name?: string;
             /** Format: date */
@@ -399,7 +496,7 @@ export interface components {
             veterinarian?: string | null;
             notes?: string | null;
         };
-        "Vaccination.jsonld-vaccination.read_timestampable.read": components["schemas"]["HydraItemBaseSchema"] & {
+        "Vaccination.jsonld-vaccination.read_timestampable.read_blameable.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
             readonly id?: string;
             /**
@@ -414,6 +511,16 @@ export interface components {
             next_due_at?: string | null;
             veterinarian?: string | null;
             notes?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            created_by?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            updated_by?: string | null;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */
@@ -440,7 +547,7 @@ export interface components {
             cost_cents?: number | null;
             notes?: string | null;
         };
-        "VetVisit.jsonld-vet_visit.read_timestampable.read": components["schemas"]["HydraItemBaseSchema"] & {
+        "VetVisit.jsonld-vet_visit.read_timestampable.read_blameable.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
             readonly id?: string;
             /**
@@ -454,6 +561,16 @@ export interface components {
             diagnosis?: string | null;
             cost_cents?: number | null;
             notes?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            created_by?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            updated_by?: string | null;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */
@@ -474,7 +591,7 @@ export interface components {
             measured_at?: string;
             weight_grams: number;
         };
-        "WeightEntry.jsonld-weight_entry.read_timestampable.read": components["schemas"]["HydraItemBaseSchema"] & {
+        "WeightEntry.jsonld-weight_entry.read_timestampable.read_blameable.read": components["schemas"]["HydraItemBaseSchema"] & {
             /** Format: uuid */
             readonly id?: string;
             /**
@@ -485,6 +602,16 @@ export interface components {
             /** Format: date */
             measured_at?: string;
             weight_grams: number;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            created_by?: string | null;
+            /**
+             * Format: iri-reference
+             * @example https://example.com/
+             */
+            updated_by?: string | null;
             /** Format: date-time */
             readonly created_at?: string;
             /** Format: date-time */
@@ -530,7 +657,7 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
-                        member: components["schemas"]["Dog.jsonld-dog.read_timestampable.read"][];
+                        member: components["schemas"]["Dog.jsonld-dog.read_timestampable.read_blameable.read"][];
                     };
                 };
             };
@@ -569,7 +696,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -627,7 +754,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Not found */
@@ -724,7 +851,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Dog.jsonld-dog.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -758,6 +885,132 @@ export interface operations {
                     "application/ld+json": components["schemas"]["ConstraintViolation.jsonld"];
                     "application/problem+json": components["schemas"]["ConstraintViolation"];
                     "application/json": components["schemas"]["ConstraintViolation"];
+                };
+            };
+        };
+    };
+    login_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The login data */
+        requestBody: {
+            content: {
+                "application/json": {
+                    email: string;
+                    password: string;
+                };
+            };
+        };
+        responses: {
+            /** @description User token created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        readonly token: string;
+                    };
+                };
+            };
+        };
+    };
+    auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Refresh token invalidated, or already invalid */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No refresh token in the request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    gesdinet_jwt_refresh_token_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JWT refreshed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        readonly token: string;
+                    };
+                };
+            };
+            /** @description The refresh token is missing, unknown or has expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    api_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User resource */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["User.jsonld-user.read"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/ld+json": components["schemas"]["Error.jsonld"];
+                    "application/problem+json": components["schemas"]["Error"];
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };
@@ -809,7 +1062,7 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
-                        member: components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read"][];
+                        member: components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read_blameable.read"][];
                     };
                 };
             };
@@ -864,7 +1117,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -938,7 +1191,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Not found */
@@ -1067,7 +1320,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["Vaccination.jsonld-vaccination.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -1140,7 +1393,7 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
-                        member: components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read"][];
+                        member: components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read_blameable.read"][];
                     };
                 };
             };
@@ -1183,7 +1436,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -1245,7 +1498,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Not found */
@@ -1350,7 +1603,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["VetVisit.jsonld-vet_visit.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -1423,7 +1676,7 @@ export interface operations {
                 };
                 content: {
                     "application/ld+json": components["schemas"]["HydraCollectionBaseSchema"] & {
-                        member: components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read"][];
+                        member: components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read_blameable.read"][];
                     };
                 };
             };
@@ -1466,7 +1719,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */
@@ -1528,7 +1781,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Not found */
@@ -1633,7 +1886,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read"];
+                    "application/ld+json": components["schemas"]["WeightEntry.jsonld-weight_entry.read_timestampable.read_blameable.read"];
                 };
             };
             /** @description Invalid input */

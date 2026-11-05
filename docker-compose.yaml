@@ -37,7 +37,7 @@ services:
       APP_ENV: dev
       APP_DEBUG: 1
       DATABASE_URL: "postgresql://app:${DB_PASSWORD:-bernadette}@db:5432/bernadette?serverVersion=16&charset=utf8"
-      CORS_ALLOW_ORIGIN: "^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$$"
+      CORS_ALLOW_ORIGIN: "http://localhost:5174"
     volumes:
       - ./backend:/app
       - /app/vendor

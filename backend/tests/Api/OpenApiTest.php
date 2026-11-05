@@ -62,4 +62,43 @@ final class OpenApiTest extends ApiResourceTestCase
         self::assertArrayHasKey('dog', $schemas['WeightEntry-weight_entry.write_weight_entry.create']['properties']);
         self::assertArrayNotHasKey('dog', $schemas['WeightEntry-weight_entry.write.jsonMergePatch']['properties']);
     }
+
+    public function testAuthenticationRoutesAreDocumentedAsPublic(): void
+    {
+        $paths = $this->documentation()['paths'];
+
+        foreach (['/api/auth/login', '/api/auth/refresh', '/api/auth/logout'] as $path) {
+            self::assertArrayHasKey($path, $paths);
+            self::assertArrayHasKey('post', $paths[$path]);
+            self::assertSame([], $paths[$path]['post']['security']);
+        }
+    }
+
+    public function testLoginDocumentsTheEmailField(): void
+    {
+        $paths = $this->documentation()['paths'];
+
+        $schema = $paths['/api/auth/login']['post']['requestBody']['content']['application/json']['schema'];
+        self::assertEqualsCanonicalizing(['email', 'password'], array_keys($schema['properties']));
+    }
+
+    public function testBearerSecuritySchemeIsDocumentedAndRequiredByDefault(): void
+    {
+        $documentation = $this->documentation();
+
+        $scheme = $documentation['components']['securitySchemes']['Bearer'];
+        self::assertSame('http', $scheme['type']);
+        self::assertSame('bearer', $scheme['scheme']);
+        self::assertSame('JWT', $scheme['bearerFormat']);
+        self::assertContains(['Bearer' => []], $documentation['security']);
+    }
+
+    public function testCurrentUserIsDocumentedButNeverItsPassword(): void
+    {
+        $documentation = $this->documentation();
+
+        self::assertArrayHasKey('/api/me', $documentation['paths']);
+        self::assertArrayNotHasKey('/api/users/{id}', $documentation['paths']);
+        self::assertStringNotContainsString('password', json_encode($documentation['components']['schemas'], \JSON_THROW_ON_ERROR));
+    }
 }

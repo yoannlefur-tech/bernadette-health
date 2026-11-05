@@ -5,24 +5,43 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Dog;
+use App\Entity\User;
 use App\Entity\Vaccination;
 use App\Entity\VetVisit;
 use App\Entity\WeightEntry;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Development data. Every value is fictional.
  */
 class AppFixtures extends Fixture
 {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $password_hasher,
+        #[Autowire(env: 'default::DEV_USER_PASSWORD')]
+        private readonly ?string $dev_user_password,
+    ) {
+    }
+
     public function load(ObjectManager $manager): void
     {
+        if (null === $this->dev_user_password || '' === $this->dev_user_password) {
+            throw new \LogicException('Set DEV_USER_PASSWORD in backend/.env.local to load the fixtures.');
+        }
+
+        $owner = (new User())->setEmail('dev@example.com');
+        $owner->setPassword($this->password_hasher->hashPassword($owner, $this->dev_user_password));
+        $manager->persist($owner);
+
         $bernadette = (new Dog())
             ->setName('Bernadette')
             ->setBirthDate(new \DateTimeImmutable('2022-03-14'))
             ->setBreed('Teckel nain')
-            ->setCoat('Poil ras, fauve');
+            ->setCoat('Poil ras, fauve')
+            ->addOwner($owner);
         $manager->persist($bernadette);
 
         $weights = [

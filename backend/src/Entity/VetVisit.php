@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['vet_visit:read', 'timestampable:read']],
+    normalizationContext: ['groups' => ['vet_visit:read', 'timestampable:read', 'blameable:read']],
     denormalizationContext: ['groups' => ['vet_visit:write']],
     order: ['visited_at' => 'DESC', 'id' => 'DESC'],
     parameters: [
@@ -43,8 +43,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[visited_at]' => new QueryParameter(filter: new SortFilter(), property: 'visited_at'),
     ],
 )]
-class VetVisit
+class VetVisit implements DogRecordInterface, BlameableInterface
 {
+    use BlameableTrait;
     use TimestampableTrait;
 
     #[ORM\Id]

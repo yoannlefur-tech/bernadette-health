@@ -34,7 +34,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new Delete(),
     ],
-    normalizationContext: ['groups' => ['vaccination:read', 'timestampable:read']],
+    normalizationContext: ['groups' => ['vaccination:read', 'timestampable:read', 'blameable:read']],
     denormalizationContext: ['groups' => ['vaccination:write']],
     order: ['administered_at' => 'DESC', 'id' => 'DESC'],
     parameters: [
@@ -45,8 +45,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[next_due_at]' => new QueryParameter(filter: new SortFilter(), property: 'next_due_at'),
     ],
 )]
-class Vaccination
+class Vaccination implements DogRecordInterface, BlameableInterface
 {
+    use BlameableTrait;
     use TimestampableTrait;
 
     #[ORM\Id]

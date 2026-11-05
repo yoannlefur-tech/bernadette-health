@@ -15,6 +15,9 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\QueryParameter;
 use App\Serializer\ApiDate;
+use App\State\DogCreateProcessor;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
@@ -28,8 +31,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['microchip_number'])]
 #[ApiResource(
-    operations: [new GetCollection(), new Post(), new Get(), new Patch(), new Delete()],
-    normalizationContext: ['groups' => ['dog:read', 'timestampable:read']],
+    operations: [
+        new GetCollection(),
+        new Post(processor: DogCreateProcessor::class),
+        new Get(),
+        new Patch(),
+        new Delete(),
+    ],
+    normalizationContext: ['groups' => ['dog:read', 'timestampable:read', 'blameable:read']],
     denormalizationContext: ['groups' => ['dog:write']],
     order: ['birth_date' => 'DESC', 'id' => 'DESC'],
     parameters: [
@@ -37,8 +46,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'order[birth_date]' => new QueryParameter(filter: new SortFilter(), property: 'birth_date'),
     ],
 )]
-class Dog
+class Dog implements BlameableInterface
 {
+    use BlameableTrait;
     use TimestampableTrait;
 
     #[ORM\Id]
@@ -79,9 +89,20 @@ class Dog
     #[Groups(['dog:read', 'dog:write'])]
     private ?string $microchip_number = null;
 
+    /**
+     * In no serialization group: owners are neither readable nor writable
+     * through the API.
+     *
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'dog_owner')]
+    private Collection $owners;
+
     public function __construct()
     {
         $this->id = Uuid::v7();
+        $this->owners = new ArrayCollection();
     }
 
     public function getId(): Uuid
@@ -145,6 +166,21 @@ class Dog
     public function setMicrochipNumber(?string $microchip_number): static
     {
         $this->microchip_number = $microchip_number;
+
+        return $this;
+    }
+
+    /** @return Collection<int, User> */
+    public function getOwners(): Collection
+    {
+        return $this->owners;
+    }
+
+    public function addOwner(User $owner): static
+    {
+        if (!$this->owners->contains($owner)) {
+            $this->owners->add($owner);
+        }
 
         return $this;
     }
