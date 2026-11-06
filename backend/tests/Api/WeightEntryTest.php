@@ -167,6 +167,29 @@ final class WeightEntryTest extends ApiResourceTestCase
         self::assertResponseStatusCodeSame(201);
     }
 
+    /**
+     * The server runs in UTC: just after midnight in France, the local date is
+     * already tomorrow for the server.
+     */
+    public function testTomorrowDateIsAccepted(): void
+    {
+        $this->createEntry($this->createDog(), self::day('tomorrow'));
+
+        self::assertResponseStatusCodeSame(201);
+    }
+
+    public function testDayAfterTomorrowIsRejected(): void
+    {
+        $response = $this->post('/api/weight_entries', [
+            'dog' => $this->createDog(),
+            'measured_at' => self::day('+2 days'),
+            'weight_grams' => 4200,
+        ]);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSame('measured_at', $response->toArray(false)['violations'][0]['propertyPath']);
+    }
+
     public function testDateBeforeBirthIsRejected(): void
     {
         $this->post('/api/weight_entries', [

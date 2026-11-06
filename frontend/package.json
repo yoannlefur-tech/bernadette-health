@@ -7,14 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "TZ=Europe/Paris vitest run",
     "preview": "vite preview",
     "types:api": "openapi-typescript http://backend:8000/api/docs.jsonopenapi -o src/api/schema.d.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.5.0",
     "@mui/material": "^9.5.0",
+    "@mui/x-charts": "^9.17.0",
     "@tanstack/react-query": "^5.106.1",
     "openapi-fetch": "^0.17.0",
     "react": "^19.3.1",

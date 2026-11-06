@@ -11,6 +11,7 @@ const me = { '@id': '/api/me', '@type': 'User', email: 'dev@example.com' }
 const bernadette = {
   '@id': '/api/dogs/1',
   '@type': 'Dog',
+  id: '1',
   name: 'Bernadette',
   breed: 'Teckel nain',
   coat: 'Poil long',
@@ -46,6 +47,13 @@ describe('HomePage', () => {
     expect(await screen.findByText('Bernadette')).toBeInTheDocument()
     expect(screen.getByText('dev@example.com')).toBeInTheDocument()
     expect(dogsTokens).toEqual(['Bearer token-1'])
+  })
+
+  it('links each dog to its own page', async () => {
+    loggedInApi()
+    renderApp('/')
+
+    expect(await screen.findByRole('link', { name: /Bernadette/ })).toHaveAttribute('href', '/dogs/1')
   })
 
   it('renews an expired access token transparently', async () => {
