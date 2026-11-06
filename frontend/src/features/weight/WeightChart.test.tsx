@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { buildChartData } from './chartData'
+import { buildChartData, formatChartDate } from './chartData'
 import { WeightChart } from './WeightChart'
 
 const weighIn = (id: string, measured_at: string, weight_grams: number) => ({
@@ -36,6 +36,35 @@ describe('buildChartData', () => {
 
   it('gives empty series without a weigh-in', () => {
     expect(buildChartData([])).toEqual({ dates: [], grams: [] })
+  })
+})
+
+describe('formatChartDate', () => {
+  it('runs in the time zone of the script', () => {
+    expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe('Europe/Paris')
+  })
+
+  it('shows the month and the year on the axis', () => {
+    expect(formatChartDate(new Date(2022, 6, 12), 'tick')).toBe('juil. 22')
+    expect(formatChartDate(new Date(2026, 0, 1), 'tick')).toBe('janv. 26')
+  })
+
+  it('adds the day in the tooltip', () => {
+    expect(formatChartDate(new Date(2022, 6, 12), 'tooltip')).toBe('12 juil. 22')
+  })
+
+  it('uses the local month, not the UTC one, around midnight', () => {
+    // July 1st at 00:30 in Paris, still June 30th in UTC.
+    const date = new Date('2022-06-30T22:30:00Z')
+
+    expect(formatChartDate(date, 'tick')).toBe('juil. 22')
+    expect(formatChartDate(date, 'tooltip')).toBe('1 juil. 22')
+  })
+
+  it('formats a date of the API on its own day', () => {
+    const [date] = buildChartData([weighIn('a', '2022-07-01', 4000)]).dates
+
+    expect(formatChartDate(date, 'tooltip')).toBe('1 juil. 22')
   })
 })
 

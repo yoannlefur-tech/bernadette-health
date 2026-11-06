@@ -2,12 +2,9 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { LineChart } from '@mui/x-charts/LineChart'
 import { useMemo } from 'react'
-import { buildChartData } from './chartData'
+import { buildChartData, formatChartDate } from './chartData'
 import type { WeighIn } from './types'
 import { formatKg } from './weightUnits'
-
-const tickDate = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit' })
-const tooltipDate = new Intl.DateTimeFormat('fr-FR')
 
 type WeightChartProps = {
   dogName: string
@@ -36,8 +33,7 @@ export function WeightChart({ dogName, weighIns }: WeightChartProps) {
           {
             scaleType: 'time',
             data: dates,
-            valueFormatter: (date: Date, { location }) =>
-              location === 'tooltip' ? tooltipDate.format(date) : tickDate.format(date),
+            valueFormatter: (date: Date, { location }) => formatChartDate(date, location),
           },
         ]}
         yAxis={[{ label: 'kg', width: 56, valueFormatter: (value: number) => formatKg(value) }]}
